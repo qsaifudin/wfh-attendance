@@ -90,10 +90,18 @@ jobs:
             npx prisma generate
             npx prisma migrate deploy
             npm run build
-            pm2 restart wfh-attendance-api || pm2 start dist/main.js --name wfh-attendance-api
+            # A relative "dist/main.js" here is exactly what broke first-time
+            # deploys — an absolute path removes any ambiguity about which
+            # cwd pm2 resolves it against. The explicit test also turns a
+            # confusing "[PM2] Script not found" into a clear build failure
+            # if this ever happens again.
+            test -f "$PWD/dist/main.js" || (echo "Build did not produce dist/main.js" && exit 1)
+            pm2 restart wfh-attendance-api || pm2 start "$PWD/dist/main.js" --name wfh-attendance-api
+            pm2 save
 
             # Frontend — Next.js app
             cd ../frontend
             npm ci
             npm run build
             pm2 restart wfh-attendance-web || pm2 start npm --name wfh-attendance-web -- start
+            pm2 save
