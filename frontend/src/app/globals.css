@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Color tokens — deep teal brand chrome with a mint accent, plus a status and
+  department palette run through the project's color validator (lightness
+  band, chroma floor, CVD separation, normal-vision floor) against these
+  exact surfaces. Mint is a dark-surface color only (1.64:1 on white) — it is
+  never used for text or small marks on a light background; --color-brand-accent-on-light
+  is the substitute there.
+*/
+:root {
+  --color-brand-primary: #0f3d3d;
+  --color-brand-accent: #2ee59d;
+  --color-brand-accent-on-light: #0d7a6f;
+
+  --color-surface-plane: #f7fafa;
+  --color-surface-card: #ffffff;
+  --color-ink-primary: #0c1a1a;
+  --color-ink-secondary: #4a5a5a;
+  --color-ink-muted: #7c8c8c;
+  --color-border: #e1eaea;
+
+  --color-status-present: #12a06b;
+  --color-status-late: #e8a317;
+  --color-status-absent: #d03b3b;
+  --color-status-inactive: #7c8c8c;
+
+  --color-dept-1: #0d8f80;
+  --color-dept-2: #eb6834;
+  --color-dept-3: #4a3aa7;
+  --color-dept-4: #eda100;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface-plane: #0b1717;
+    --color-surface-card: #12201f;
+    --color-ink-primary: #ffffff;
+    --color-ink-secondary: #c2d0ce;
+    --color-ink-muted: #8a9a9a;
+    --color-border: rgba(255, 255, 255, 0.1);
+
+    --color-status-present: #14a870;
+    --color-status-late: #c98500;
+    --color-status-absent: #d64545;
+    --color-status-inactive: #8a9a9a;
+
+    --color-dept-1: #199e8d;
+    --color-dept-2: #d95926;
+    --color-dept-3: #9085e9;
+    --color-dept-4: #c98500;
+  }
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+/* A thin, rounded scrollbar with no native up/down arrow buttons — defining
+ * any ::-webkit-scrollbar-* rule replaces the OS scrollbar entirely, which
+ * is what drops the arrow buttons; scrollbar-width: thin does the same for
+ * Firefox. Used on dialogs, selects, and anywhere else scrolls internally. */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.scroll-soft::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-soft::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-soft::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+.scroll-soft::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-ink-muted);
+}
+
+/* Native date/time inputs render their calendar/clock icon in a fixed dark
+ * color unless told which color-scheme they're sitting on — without this
+ * the icon is a black glyph on our dark surface, effectively invisible. */
+@media (prefers-color-scheme: dark) {
+  input[type='date'],
+  input[type='time'] {
+    color-scheme: dark;
+  }
+}
+
+body {
+  background-color: var(--color-surface-plane);
+  color: var(--color-ink-primary);
+}

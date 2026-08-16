@@ -1,0 +1,100 @@
+// Naming rule for this project: data is snake_case, code is camelCase.
+// Model names double as MySQL table names on purpose — there is no @@map or
+// @map anywhere in this file. What you read here is exactly what MySQL gets.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum user_status {
+  ACTIVE
+  INACTIVE
+}
+
+enum attendance_status {
+  PRESENT
+  LATE
+}
+
+model departments {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  employees employees[]
+}
+
+model users {
+  id       Int         @id @default(autoincrement())
+  email    String      @unique
+  password String
+  role     role
+  status   user_status @default(ACTIVE)
+
+  employee employees?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model employees {
+  id            Int     @id @default(autoincrement())
+  user_id       Int     @unique
+  full_name     String
+  position      String
+  department_id Int
+  photo_key     String?
+  photo_url     String?
+
+  user       users       @relation(fields: [user_id], references: [id])
+  department departments @relation(fields: [department_id], references: [id])
+
+  attendances attendances[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([department_id])
+}
+
+model attendances {
+  id                          Int               @id @default(autoincrement())
+  employee_id                 Int
+  work_date                   DateTime          @db.Date
+  clock_in_at                 DateTime
+  photo_key                   String
+  photo_url                   String
+  latitude                    Decimal?          @db.Decimal(10, 7)
+  longitude                   Decimal?          @db.Decimal(10, 7)
+  status                      attendance_status
+  applied_late_tolerance_time String
+  notes                       String?
+
+  employee employees @relation(fields: [employee_id], references: [id])
+
+  created_at DateTime @default(now())
+
+  @@unique([employee_id, work_date])
+  @@index([work_date])
+}
+
+// Single-row configuration table (id is always 1). late_tolerance_time is the
+// last minute that still counts as on time — "09:30" means 09:31 is LATE.
+model attendance_settings {
+  id                  Int      @id @default(1)
+  late_tolerance_time String   @default("09:30")
+  require_location    Boolean  @default(true)
+  updated_at          DateTime @updatedAt
+  updated_by_id       Int?
+}
